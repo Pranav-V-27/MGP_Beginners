@@ -1,17 +1,33 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-import joblib
+# import joblib
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.preprocessing import LabelEncoder
-import zipfile
+from sklearn.impute import SimpleImputer
+# import zipfile
 
 # with zipfile.ZipFile("./Model/exc.zip") as zip:
 #     with zip.open("content/ExtraTreesClassifier.joblib") as myZip:
 #         model = joblib.load(myZip)
-model = joblib.load(r'Model/ExtraTreesClassifier.joblib')
+# model = joblib.load(r'Model/ExtraTreesClassifier.joblib')
+model = ExtraTreesClassifier()
 
 train =  pd.read_csv("./Dataset/RTA Data.csv")
+train_copy = train.copy()
+SI = SimpleImputer(strategy="most_frequent")
+train_copy = pd.DataFrame(SI.fit_transform(train_copy))
+
+train_copy.columns = train_copy.columns
+
+for col in train_copy.columns:
+  if col in ['Number_of_vehicles_involved','Number_of_casualties', 'Accident_severity']:
+    continue
+  le = LabelEncoder()
+  train_copy[col] = le.fit_transform(train_copy[col])
+
+model.fit(train_copy.iloc[:,:-1], train_copy.iloc[:,-1])
+
 st.set_page_config(page_title="Accident Severity Prediction App",
                    page_icon="🚧", layout="wide")
 
