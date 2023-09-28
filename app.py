@@ -6,9 +6,10 @@ from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.preprocessing import LabelEncoder
 import zipfile
 
-with zipfile.ZipFile("./Model/exc.zip") as zip:
-    with zip.open("content/ExtraTreesClassifier.joblib") as myZip:
-        model = joblib.load(myZip)
+# with zipfile.ZipFile("./Model/exc.zip") as zip:
+#     with zip.open("content/ExtraTreesClassifier.joblib") as myZip:
+#         model = joblib.load(myZip)
+model = joblib.load(r'Model/ExtraTreesClassifier.joblib')
 
 train =  pd.read_csv("./Dataset/RTA Data.csv")
 st.set_page_config(page_title="Accident Severity Prediction App",
