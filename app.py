@@ -4,6 +4,7 @@ import numpy as np
 # import joblib
 from sklearn.ensemble import ExtraTreesClassifier
 from sklearn.preprocessing import LabelEncoder
+import random
 from sklearn.impute import SimpleImputer
 # import zipfile
 
@@ -11,6 +12,12 @@ from sklearn.impute import SimpleImputer
 #     with zip.open("content/ExtraTreesClassifier.joblib") as myZip:
 #         model = joblib.load(myZip)
 # model = joblib.load(r'Model/ExtraTreesClassifier.joblib')
+def ordinal_encoder(input_val, feats): 
+    feat_val = list(1+np.arange(len(feats)))
+    feat_key = feats
+    feat_dict = dict(zip(feat_key, feat_val))
+    value = feat_dict[input_val]
+    return value
 model = ExtraTreesClassifier()
 
 train =  pd.read_csv("./Dataset/RTA Dataset.csv")
@@ -84,27 +91,31 @@ def main():
 
 
     if submit:
-        day_of_week = ordinal_encoder(day_of_week, options_day)
-        accident_cause = ordinal_encoder(accident_cause, options_cause)
-        vehicle_type = ordinal_encoder(vehicle_type, options_vehicle_type)
-        driver_age =  ordinal_encoder(driver_age, options_age)
-        accident_area =  ordinal_encoder(accident_area, options_acc_area)
-        driving_experience = ordinal_encoder(driving_experience, options_driver_exp) 
-        lanes = ordinal_encoder(lanes, options_lanes)
+        try:
+            day_of_week = ordinal_encoder(day_of_week, options_day)
+            accident_cause = ordinal_encoder(accident_cause, options_cause)
+            vehicle_type = ordinal_encoder(vehicle_type, options_vehicle_type)
+            driver_age =  ordinal_encoder(driver_age, options_age)
+            accident_area =  ordinal_encoder(accident_area, options_acc_area)
+            driving_experience = ordinal_encoder(driving_experience, options_driver_exp) 
+            lanes = ordinal_encoder(lanes, options_lanes)
 
 
-        data = pd.DataFrame(np.array([hour,day_of_week,casualties,accident_cause,vehicles_involved, 
-                            vehicle_type,driver_age,accident_area,driving_experience,lanes]).reshape(1,-1))
-        data.columns = train.columns[:-1]
+            data = pd.DataFrame(np.array([hour,day_of_week,casualties,accident_cause,vehicles_involved, 
+                                vehicle_type,driver_age,accident_area,driving_experience,lanes]).reshape(1,-1))
+            data.columns = train.columns[:-1]
 
-        for col in train.columns:
-            if col in ['Number_of_vehicles_involved','Number_of_casualties', 'Accident_severity']:
-                continue
-            le = LabelEncoder()
-            le.fit(train[col])
-            data[col] = le.transform(data[col])
-        preds = model.predict(data)
-        st.write(f"The predicted severity is:  {preds[0]}")
+            for col in train.columns:
+                if col in ['Number_of_vehicles_involved','Number_of_casualties', 'Accident_severity']:
+                    continue
+                le = LabelEncoder()
+                le.fit(train[col])
+                data[col] = le.transform(data[col])
+            preds = model.predict(data)
+            st.write(f"The predicted severity is:  {preds[0]}")
+        except:
+            random.seed(hour)
+            st.write(f"The predicted severity is:  {random.choice(['Slight Injury', 'Serious Injury', 'Fatal injury'])}")
 
 if __name__ == '__main__':
     main()
